@@ -1,0 +1,56 @@
+Assignment 5 of the SLAE course by SecurityTube
+Analysis of a Metasploit payload (linux/x86/exec) using Ndisasm 
+
+
+{}------------------------------------------------------------------------------{}
+
+# msfvenom -p linux/x86/exec --payload-options
+Options for payload/linux/x86/exec:
+
+
+       Name: Linux Execute Command
+     Module: payload/linux/x86/exec
+   Platform: Linux
+       Arch: x86
+Needs Admin: No
+ Total size: 36
+       Rank: Normal
+
+Provided by:
+    vlad902 <vlad902@gmail.com>
+
+Basic options:
+Name  Current Setting  Required  Description
+----  ---------------  --------  -----------
+CMD                    yes       The command string to execute
+
+Description:
+  Execute an arbitrary command
+
+
+{}------------------------------------------------------------------------------{}
+
+
+# msfvenom -p linux/x86/exec CMD=ls | ndisasm -u -
+No platform was selected, choosing Msf::Module::Platform::Linux from the payload
+No Arch selected, selecting Arch: x86 from the payload
+No encoder or badchars specified, outputting raw payload
+Payload size: 38 bytes
+
+00000000  6A0B              push byte +0xb			; push 0xb to the stack (11)
+00000002  58                pop eax				; eax = 0xb
+00000003  99                cdq					; extend eax so edx = 0x0
+00000004  52                push edx				; push 0 to the stack
+00000005  66682D63          push word 0x632d			; -c 
+00000009  89E7              mov edi,esp				; move stack pointer to edi
+0000000B  682F736800        push dword 0x68732f			; push "hs/" to the stack
+00000010  682F62696E        push dword 0x6e69622f		; push "nib/" to the stack
+00000015  89E3              mov ebx,esp				; move stack pointer to ebx
+00000017  52                push edx				; push 0 to the stack
+00000018  E803000000        call dword 0x20			; ls command address is pushed to the stack
+0000001D  6C                insb				; ls\0
+0000001E  7300              jnc 0x20				
+00000020  57                push edi				; push edi to the stack (-c)
+00000021  53                push ebx				; push ebx to the stack (bin/sh)
+00000022  89E1              mov ecx,esp				; move stack pointer to ecx
+00000024  CD80              int 0x80				; exec (11)
